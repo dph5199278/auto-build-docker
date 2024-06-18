@@ -1,0 +1,101 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Docker Tomcat Native CI
+
+# Controls when the workflow will run
+on:
+  schedule:
+  - cron: "0 12 * * 6"
+
+  workflow_dispatch:
+
+env:
+  JAVA8_PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le
+  JAVA_PLATFORMS: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  version:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.REPOSITORY }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '21'
+      - name: Run Java Program and Save Output
+        id: java-run
+        run: |
+          echo "matrix=$(java -jar ./tomcat-native/tomcat-native-schdule.jar)" >> $GITHUB_OUTPUT
+    outputs:
+      matrix: ${{ steps.java-run.outputs.matrix }}
+
+  build:
+    if: ${{ success() && needs.version.outputs.matrix != '' }}
+    needs: version
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.version.outputs.matrix) }}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.REPOSITORY }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '21'
+      - name: Set Version
+        id: java-version-run
+        run: |
+          TN_MINOR_VERSION=$(echo "${{ matrix.tn }}" | sed 's/\([0-9]*\.[0-9]*\).*/\1/g')
+          TN_MAJOR_VERSION=$(echo "${TN_MINOR_VERSION}" | sed 's/\([0-9]*\).*/\1/g')
+          JAVA_PATCH_VERSION=$(echo "${{ matrix.java }}" | sed 's/\([0-9u\.]*\)[-|_].*/\1/g')
+          JAVA_MAJOR_VERSION=$(echo "${JAVA_PATCH_VERSION}" | sed 's/\([0-9]*\).*/\1/g')
+          echo "java-patch-version=$JAVA_PATCH_VERSION" >> $GITHUB_OUTPUT
+          echo "java-major-version=$JAVA_MAJOR_VERSION" >> $GITHUB_OUTPUT
+          echo "tn-minor-version=$TN_MINOR_VERSION" >> $GITHUB_OUTPUT
+          if [ $JAVA_MAJOR_VERSION -gt 8 ]; then
+            sleep $(( ($TN_MAJOR_VERSION - 1) * 120 + $JAVA_MAJOR_VERSION * 3 ));
+          fi;
+
+      - if: ${{ success() && matrix.java != '' && matrix.tn != '' }}
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - if: ${{ success() && matrix.java != '' && matrix.tn != '' }}
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - if: ${{ success() && matrix.java != '' && matrix.tn != '' }}
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - if: ${{ success() && matrix.java != '' && matrix.tn != '' }}
+        name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./tomcat-native
+          build-args: |
+            BUILD_IMAGE=eclipse-temurin:${{ matrix.java }}
+            TOMCAT_NATIVE_VERSION_ARG=${{ matrix.tn }}
+          push: true
+          platforms: ${{ startsWith(matrix.java, '8u') && env.JAVA8_PLATFORMS || env.JAVA_PLATFORMS }}
+          tags: dph5199278/tomcat-native-lib:${{ matrix.tn }}-jre${{ steps.java-version-run.outputs.java-patch-version }},dph5199278/tomcat-native-lib:${{ matrix.tn }}-jre${{ steps.java-version-run.outputs.java-major-version }},dph5199278/tomcat-native-lib:${{ steps.java-version-run.outputs.tn-minor-version }}-jre${{ steps.java-version-run.outputs.java-major-version }}

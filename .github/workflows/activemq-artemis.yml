@@ -1,0 +1,79 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Docker ActiveMQ Artemis CI
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch:
+
+env:
+  ARTEMIS_VERSION_ARG: 2.31.2
+  SHA512_VAL_ARG: b1f2a9fc245db400982bed0fd8df0f5b1c25a42aa7170bda7b02e37ea92d1f59fd4a290bd18e3b47f68735a0524cfc239db2a01838927c33a0fb654cacf8f095
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  alpine:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.REPOSITORY }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./activemq-artemis/alpine
+          build-args: |
+            ARTEMIS_VERSION_ARG=${{ env.ARTEMIS_VERSION_ARG }}
+            SHA512_VAL_ARG=${{ env.SHA512_VAL_ARG }}
+          push: true
+          platforms: linux/amd64,linux/arm64/v8
+          tags: dph5199278/activemq-artemis:${{ env.ARTEMIS_VERSION_ARG }}-alpine
+  ubuntu:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.REPOSITORY }}
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./activemq-artemis/ubuntu
+          build-args: |
+            ARTEMIS_VERSION_ARG=${{ env.ARTEMIS_VERSION_ARG }}
+            SHA512_VAL_ARG=${{ env.SHA512_VAL_ARG }}
+          push: true
+          platforms: linux/amd64,linux/arm64/v8
+          tags: dph5199278/activemq-artemis:${{ env.ARTEMIS_VERSION_ARG }}
