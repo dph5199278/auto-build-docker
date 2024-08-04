@@ -89,12 +89,25 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - if: ${{ success() && matrix.java != '' && matrix.tn != '' }}
-        name: Build and push
+        name: Build and push JDK
         uses: docker/build-push-action@v5
         with:
           context: ./tomcat-native
           build-args: |
-            BUILD_IMAGE=eclipse-temurin:${{ matrix.java }}
+            BUILDER_IMAGE=eclipse-temurin:${{ matrix.java }}-jdk
+            PROD_IMAGE=eclipse-temurin:${{ matrix.java }}-jdk
+            TOMCAT_NATIVE_VERSION_ARG=${{ matrix.tn }}
+          push: true
+          platforms: ${{ startsWith(matrix.java, '8u') && env.JAVA8_PLATFORMS || env.JAVA_PLATFORMS }}
+          tags: dph5199278/tomcat-native-lib:${{ matrix.tn }}-jdk${{ steps.java-version-run.outputs.java-patch-version }},dph5199278/tomcat-native-lib:${{ matrix.tn }}-jdk${{ steps.java-version-run.outputs.java-major-version }},dph5199278/tomcat-native-lib:${{ steps.java-version-run.outputs.tn-minor-version }}-jdk${{ steps.java-version-run.outputs.java-major-version }}
+      - if: ${{ success() && matrix.java != '' && matrix.tn != '' }}
+        name: Build and push JRE
+        uses: docker/build-push-action@v5
+        with:
+          context: ./tomcat-native
+          build-args: |
+            BUILDER_IMAGE=eclipse-temurin:${{ matrix.java }}-jdk
+            PROD_IMAGE=eclipse-temurin:${{ matrix.java }}-jre
             TOMCAT_NATIVE_VERSION_ARG=${{ matrix.tn }}
           push: true
           platforms: ${{ startsWith(matrix.java, '8u') && env.JAVA8_PLATFORMS || env.JAVA_PLATFORMS }}
