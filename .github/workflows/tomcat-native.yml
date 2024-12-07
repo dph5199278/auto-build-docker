@@ -112,3 +112,37 @@ jobs:
           push: true
           platforms: ${{ startsWith(matrix.java, '8u') && env.JAVA8_PLATFORMS || env.JAVA_PLATFORMS }}
           tags: dph5199278/tomcat-native-lib:${{ matrix.tn }}-jre${{ steps.java-version-run.outputs.java-patch-version }},dph5199278/tomcat-native-lib:${{ matrix.tn }}-jre${{ steps.java-version-run.outputs.java-major-version }},dph5199278/tomcat-native-lib:${{ steps.java-version-run.outputs.tn-minor-version }}-jre${{ steps.java-version-run.outputs.java-major-version }}
+
+  push:
+    needs: [version, build]
+    if: ${{ success() && needs.version.outputs.matrix != '' }}
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    permissions:                # Job-level permissions configuration starts here
+      contents: write           # 'write' access to repository contents
+      pull-requests: write      # 'write' access to pull requests
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          ref: ${{ github.ref }}
+          persist-credentials: false
+
+      - name: Update version
+        run: |
+          echo "${{ needs.version.outputs.matrix }}" > ./tomcat-native/version.txt
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "docs(tomcat-native): update version"
+          git pull --rebase
+
+      - name: Push version
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_PAT }}
+          branch: ${{ github.ref }}
+        
