@@ -125,3 +125,36 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
           tags: dph5199278/openssl:${{ steps.set-version.outputs.patch }},dph5199278/openssl:${{ steps.set-version.outputs.minor }}
+
+  push:
+    needs: [version, alpine, debian]
+    if: ${{ success() && needs.version.outputs.version != '' }}
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    permissions:                # Job-level permissions configuration starts here
+      contents: write           # 'write' access to repository contents
+      pull-requests: write      # 'write' access to pull requests
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          ref: ${{ github.ref }}
+          persist-credentials: false
+
+      - name: Update version
+        run: |
+          echo "${{ needs.version.outputs.version }}" > ./openssl/version.txt
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git commit -m "docs(openssl): update version"
+          git pull --rebase
+
+      - name: Push version
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_PAT }}
+          branch: ${{ github.ref }}
