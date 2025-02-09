@@ -41,7 +41,7 @@ jobs:
     needs: version
     if: ${{ success() && needs.version.outputs.version != '' }}
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix: 
@@ -85,7 +85,7 @@ jobs:
     needs: version
     if: ${{ success() && needs.version.outputs.version != '' }}
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix: 

@@ -19,7 +19,7 @@ jobs:
   # This workflow contains a single job called "build"
   alpine:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -52,7 +52,7 @@ jobs:
           tags: dph5199278/apr:${{ env.APR_VERSION_ARG }}-alpine
   debian:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
