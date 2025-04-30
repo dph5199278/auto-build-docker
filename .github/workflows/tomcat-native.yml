@@ -195,6 +195,7 @@ jobs:
             BUILDER_IMAGE=eclipse-temurin:${{ matrix.java }}-jdk
             PROD_IMAGE=eclipse-temurin:${{ matrix.java }}-jdk
             TOMCAT_NATIVE_VERSION_ARG=${{ matrix.tn }}
+            OPENSSL_IMAGE=dph5199278/openssl:3.5
           push: true
           platforms: ${{ env.JAVA_PLATFORMS }}
           tags: dph5199278/tomcat-native-lib:${{ matrix.tn }}-jdk${{ steps.java-version-run.outputs.java-patch-version }},dph5199278/tomcat-native-lib:${{ matrix.tn }}-jdk${{ steps.java-version-run.outputs.java-major-version }},dph5199278/tomcat-native-lib:${{ steps.java-version-run.outputs.tn-minor-version }}-jdk${{ steps.java-version-run.outputs.java-major-version }}
@@ -207,6 +208,7 @@ jobs:
             BUILDER_IMAGE=eclipse-temurin:${{ matrix.java }}-jdk
             PROD_IMAGE=eclipse-temurin:${{ matrix.java }}-jre
             TOMCAT_NATIVE_VERSION_ARG=${{ matrix.tn }}
+            OPENSSL_IMAGE=dph5199278/openssl:3.5
           push: true
           platforms: ${{ env.JAVA_PLATFORMS }}
           tags: dph5199278/tomcat-native-lib:${{ matrix.tn }}-jre${{ steps.java-version-run.outputs.java-patch-version }},dph5199278/tomcat-native-lib:${{ matrix.tn }}-jre${{ steps.java-version-run.outputs.java-major-version }},dph5199278/tomcat-native-lib:${{ steps.java-version-run.outputs.tn-minor-version }}-jre${{ steps.java-version-run.outputs.java-major-version }}
