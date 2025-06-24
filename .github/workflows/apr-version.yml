@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  APR_VERSION_ARG: 1.7.5
+  APR_VERSION_ARG: 1.7.6
   APR_ICONV_VERSION_ARG: 1.2.2
   APR_UTIL_VERSION_ARG: 1.6.3
 
