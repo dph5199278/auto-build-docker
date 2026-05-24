@@ -45,7 +45,7 @@ jobs:
             APR_ICONV_VERSION_ARG=${{ env.APR_ICONV_VERSION_ARG }}
             APR_UTIL_VERSION_ARG=${{ env.APR_UTIL_VERSION_ARG }}
           push: true
-          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
+          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x,linux/riscv64
           tags: dph5199278/apr:${{ env.APR_VERSION_ARG }}-alpine,dph5199278/apr:alpine-base
   debian:
     # The type of runner that the job will run on
@@ -78,5 +78,5 @@ jobs:
             APR_ICONV_VERSION_ARG=${{ env.APR_ICONV_VERSION_ARG }}
             APR_UTIL_VERSION_ARG=${{ env.APR_UTIL_VERSION_ARG }}
           push: true
-          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
+          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x,linux/riscv64
           tags: dph5199278/apr:${{ env.APR_VERSION_ARG }},dph5199278/apr:base,dph5199278/apr:latest

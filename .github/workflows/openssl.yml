@@ -79,7 +79,7 @@ jobs:
           build-args: |
             OPENSSL_VERSION_ARG=${{ steps.set-version.outputs.patch }}
           push: true
-          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
+          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x,linux/riscv64
           tags: dph5199278/openssl:${{ steps.set-version.outputs.patch }}-alpine,dph5199278/openssl:${{ steps.set-version.outputs.minor }}-alpine
   debian:
     needs: version
@@ -123,7 +123,7 @@ jobs:
           build-args: |
             OPENSSL_VERSION_ARG=${{ steps.set-version.outputs.patch }}
           push: true
-          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x
+          platforms: linux/amd64,linux/arm64/v8,linux/ppc64le,linux/s390x,linux/riscv64
           tags: dph5199278/openssl:${{ steps.set-version.outputs.patch }},dph5199278/openssl:${{ steps.set-version.outputs.minor }}
 
   push:
