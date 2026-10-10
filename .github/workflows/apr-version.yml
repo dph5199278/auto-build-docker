@@ -12,7 +12,7 @@ on:
 env:
   APR_VERSION_ARG: 1.7.6
   APR_ICONV_VERSION_ARG: 1.2.2
-  APR_UTIL_VERSION_ARG: 1.6.3
+  APR_UTIL_VERSION_ARG: 1.6.5
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
